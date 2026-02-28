@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/xmirrorsecurity/opensca-cli/v3/opensca/logs"
 
@@ -44,6 +45,12 @@ func xrar(ctx context.Context, filter ExtractFileFilter, input, output string) b
 		fp := filepath.Join(output, fh.Name)
 		if fh.IsDir {
 			os.MkdirAll(fp, 0755)
+			continue
+		}
+
+		// avoid path traversal
+		if !strings.HasPrefix(fp, filepath.Clean(output)+string(os.PathSeparator)) {
+			logs.Warn("Invalid file path: %s", fp)
 			continue
 		}
 
